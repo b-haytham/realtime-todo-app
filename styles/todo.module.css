@@ -1,0 +1,72 @@
+.layout {
+    background-color: black;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.title {
+    position: absolute;
+    top: 50px;
+    color: white !important;
+}
+
+.username {
+    color: green;
+    font-style: italic;
+    position: absolute;
+    top: 15px;
+    right: 15px;
+}
+
+.otherUsers {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+}
+
+.otherUsernames {
+    margin-bottom: 0;
+    margin-right: 10px;
+    font-style: italic;
+}
+
+.form {
+    display: flex;
+}
+
+.input {
+    border-radius: 15px;
+    margin-right: 10px;
+}
+
+.btn {
+    background-color: green;
+    border: none;
+}
+
+
+
+.singleTodo {
+    width: 460px;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 2px solid white;
+    border-radius: 25px;
+    margin: 20px 0;
+}
+
+.todoText {
+    color: white ;
+    text-align: center;
+}
+.span {
+    font-weight: bolder;
+    font-style: italic;
+    
+
+}
+
