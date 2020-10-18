@@ -91,13 +91,34 @@ const Todo = () => {
         });
     }, []);
 
+    useEffect(() => {
+        socket.on("input-changed", (v) => {
+            setInput(v)
+        });
+    }, []);
+
+    useEffect(()=>{
+        InputRef.current.onFocus = (e) => {
+            socket.emit('focus-input', true)
+        }
+
+
+        socket.on('input-focused', (f)=> {
+            InputRef.current.focus()
+        })
+    },[InputRef])
+
+
     const handleInputChange = (e) => {
 
         setInput(e.target.value);
+        socket.emit('change-input-value', e.target.value)
     };
 
     const handleSubmit = () => {
+        socket.emit('change-input-value', '')
         socket.emit("new-todo", input);
+        setInput('')
     };
 
     return (
@@ -167,6 +188,7 @@ const Todo = () => {
 
             <div className={classes.form}>
                 <Input
+                    ref={InputRef}
                     className={classes.input}
                     value={input}
                     onChange={handleInputChange}

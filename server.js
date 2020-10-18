@@ -46,6 +46,14 @@ nextApp.prepare().then(() => {
             })
         })
 
+        socket.on('focus-input', v=> {
+            socket.broadcast.emit('input-focused', v)
+        })
+
+
+        socket.on('change-input-value', v=> {
+            socket.broadcast.emit('input-changed', v)
+        })
 
         socket.on('new-todo', (td)=> {
             const user = users.find(u=> u.id === socket.id)
@@ -95,7 +103,7 @@ nextApp.prepare().then(() => {
         return handle(req, res);
     });
 
-    server.listen(port, (err) => {
+    server.listen(port, '192.168.1.17', (err) => {
         if (err) throw err;
         console.log(`> Ready on http://localhost:${port}`);
     });

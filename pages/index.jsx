@@ -30,7 +30,7 @@ const Index = () => {
     return (
         <Layout className={classes.layout}>
             <Typography.Title className={classes.title}>
-                Realime Todo App
+                Realtime Todo App
             </Typography.Title>
             <div className={classes.form}>
                 <label className={classes.label} htmlFor="username">
