@@ -1,3 +1,5 @@
+require('dotenv').config()
+
 const express = require("express");
 const next = require("next");
 const http = require("http");
@@ -103,8 +105,8 @@ nextApp.prepare().then(() => {
         return handle(req, res);
     });
 
-    server.listen(port, '192.168.1.17', (err) => {
+    server.listen(port, process.env.HOST, (err) => {
         if (err) throw err;
-        console.log(`> Ready on http://localhost:${port}`);
+        console.log(`> Ready on http://${process.env.HOST}:${port}`);
     });
 });
