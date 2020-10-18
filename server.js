@@ -34,7 +34,19 @@ nextApp.prepare().then(() => {
 
             io.emit('all-users', users)
         })
+
         
+        socket.on('position', p=> {
+
+            const user = users.find(u=> u.id === p.userId)
+
+            socket.broadcast.emit('position', {
+                    position: p.position,
+                    username: user.username
+            })
+        })
+
+
         socket.on('new-todo', (td)=> {
             const user = users.find(u=> u.id === socket.id)
 
@@ -69,6 +81,7 @@ nextApp.prepare().then(() => {
 
 
     })
+
 
     app.get('/users', (req, res)=> {
         res.json(users)

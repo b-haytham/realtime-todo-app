@@ -2,11 +2,16 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 
 import { Input, Layout, Typography, Tooltip, Button, message } from "antd";
-import { CaretUpOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+    CaretUpOutlined,
+    DeleteOutlined,
+    PlusOutlined,
+} from "@ant-design/icons";
 
 import { socket } from "../utils/socketioClient";
 
 import classes from "../styles/todo.module.css";
+import { useWindowSize } from "../utils/useWindowSize";
 import { colors } from "../utils/colors";
 
 const Todo = () => {
@@ -17,8 +22,34 @@ const Todo = () => {
     const [user, setUser] = useState(null);
     const [allUsers, setAllUsers] = useState(null);
     const [allTodos, setAllTodos] = useState(null);
+    const [pos, setPos] = useState(null);
+
+    const { width, height } = useWindowSize();
 
     const [input, setInput] = useState("");
+
+    useEffect(() => {
+        // const width = window.innerWidth
+        // const height = window.innerHeight
+        window.addEventListener("mousemove", (e) => {
+            const position = {
+                x: `${(e.clientX / width) * 100}%`,
+                y: `${(e.clientY / height) * 100}%`,
+            };
+
+            socket.emit("position", {
+                userId: socket.id,
+                position,
+            });
+        });
+    }, [width, height]);
+
+    useEffect(() => {
+        socket.on("position", (p) => {
+            console.log(p);
+            setPos(p);
+        });
+    }, [pos]);
 
     useEffect(() => {
         socket.emit("get-user", router.query.u);
@@ -34,17 +65,17 @@ const Todo = () => {
             .then((u) => setAllUsers(u))
             .catch(console.log);
 
-        socket.on("all-users", (users) => {
-            console.log(users);
-            setAllUsers(users);
-        });
-    }, []);
-
-    useEffect(() => {
         fetch("/todos")
             .then((res) => res.json())
             .then((t) => setAllTodos(t))
             .catch(console.log);
+    }, []);
+
+    useEffect(() => {
+        socket.on("all-users", (users) => {
+            console.log(users);
+            setAllUsers(users);
+        });
     }, []);
 
     useEffect(() => {
@@ -54,13 +85,14 @@ const Todo = () => {
         });
     }, []);
 
-    useEffect(()=>{
-        socket.on('todo-deleted', t=> {
-            message.warn(`${t.user.username} has deleted todo "${t.text}"`)
-        })
-    }, [])
+    useEffect(() => {
+        socket.on("todo-deleted", (t) => {
+            message.warn(`${t.user.username} has deleted todo "${t.text}"`);
+        });
+    }, []);
 
     const handleInputChange = (e) => {
+
         setInput(e.target.value);
     };
 
@@ -76,6 +108,31 @@ const Todo = () => {
                     {user.username}
                 </Typography.Paragraph>
             )}
+            {pos && (
+                    <>
+                        <span
+                            style={{
+                                position: "absolute",
+                                top: pos.position.y,
+                                left: pos.position.x,
+                                zIndex: 200,
+                            }}
+                            className={classes.badge}
+                        >
+                            {pos.username}
+                        </span>
+                        <CaretUpOutlined
+                            style={{
+                                color: "red",
+                                zIndex: "100",
+                                position: "absolute",
+                                top: `calc(${pos.position.y} - 7px)`,
+                                left: `calc(${pos.position.x} - 7px)`,
+                            }}
+                        />
+                    </>
+                )}
+
             <div className={classes.otherUsers}>
                 {allUsers &&
                     allUsers
@@ -91,7 +148,7 @@ const Todo = () => {
                                 }}
                             >
                                 <p
-                                    style={{ color: colors[i] }}
+                                    style={{ color: "#008080" }}
                                     className={classes.otherUsernames}
                                 >
                                     {u.username}
@@ -100,7 +157,7 @@ const Todo = () => {
                                     style={{
                                         width: "10px",
                                         height: "10px",
-                                        backgroundColor: colors[i],
+                                        backgroundColor: "#008080",
                                         borderRadius: "50%",
                                     }}
                                 />
@@ -132,12 +189,10 @@ const Todo = () => {
                                 <span
                                     className={classes.span}
                                     style={{
-                                        color: findUserColor(
-                                            t.user.id,
-                                            allUsers,
-                                            colors,
-                                            user
-                                        ),
+                                        color:
+                                            t.user.username === user.username
+                                                ? "green"
+                                                : "#008080",
                                     }}
                                 >
                                     {t.user.username}
@@ -147,7 +202,9 @@ const Todo = () => {
                             </p>
                             <Tooltip title="delete Todo">
                                 <Button
-                                    onClick={()=>{socket.emit('delete-todo', t)}}
+                                    onClick={() => {
+                                        socket.emit("delete-todo", t);
+                                    }}
                                     className={classes.btn}
                                     shape="circle"
                                     icon={<DeleteOutlined />}
@@ -160,22 +217,5 @@ const Todo = () => {
     );
 };
 
-const findUserColor = (userId, users, colors, currentUser) => {
-    let color;
-
-    if (currentUser.id === userId) {
-        return "green";
-    }
-
-    users
-        .filter((u) => u.id === userId)
-        .forEach((u, i) => {
-            if (u.id === userId) {
-                color = colors[i];
-            }
-        });
-
-    return color;
-};
 
 export default Todo;
